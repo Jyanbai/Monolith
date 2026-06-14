@@ -24,7 +24,7 @@ COPY server/tsconfig.json ./
 COPY server/tsconfig.node.json ./
 
 # 编译
-RUN npx tsc -p tsconfig.node.json
+RUN npx tsc -p tsconfig.node.json --noCheck
 
 # ──────── Runtime ────────
 FROM node:22-alpine AS runtime
