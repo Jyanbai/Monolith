@@ -62,7 +62,7 @@ app.use("*", async (c, next) => {
 // 注入存储实例到上下文（每次请求创建 — 在边缘环境中是无状态的）
 app.use("*", async (c, next) => {
   c.set("db", await createDatabase(c.env as unknown as Record<string, unknown>));
-  c.set("storage", createObjectStorage(c.env as unknown as Record<string, unknown>));
+  c.set("storage", await createObjectStorage(c.env as unknown as Record<string, unknown>));
   await next();
 });
 

@@ -77,7 +77,7 @@ export async function createDatabase(env: Record<string, unknown>): Promise<IDat
  *  - 阿里云 OSS:   S3_ENDPOINT=https://oss-cn-hangzhou.aliyuncs.com
  *  - 腾讯云 COS:   S3_ENDPOINT=https://cos.ap-guangzhou.myqcloud.com
  */
-export function createObjectStorage(env: Record<string, unknown>): IObjectStorage {
+export async function createObjectStorage(env: Record<string, unknown>): Promise<IObjectStorage> {
   const provider = (env.STORAGE_PROVIDER as string) || "r2";
 
   switch (provider) {
@@ -107,7 +107,15 @@ export function createObjectStorage(env: Record<string, unknown>): IObjectStorag
       });
     }
 
+    case "fs": {
+      // Node.js 部署专用：本地文件系统对象存储
+      // 通过动态 import 避免 Workers 编译时引入 node:fs
+      const root = (env.FS_ROOT as string) || "/data/monolith-objects";
+      const { FsAdapter } = await import("./object/fs");
+      return new FsAdapter(root);
+    }
+
     default:
-      throw new Error(`不支持的存储提供者: ${provider}。可选值: r2, s3`);
+      throw new Error(`不支持的存储提供者: ${provider}。可选值: r2, s3, fs`);
   }
 }

@@ -1,0 +1,55 @@
+# ──────────────────────────────────────────────
+#  Monolith — bero 部署 docker-compose
+#  - monolith-server: Hono on Node 22 (PG + 本地 FS)
+#  - monolith-db: PostgreSQL 16 (独立 PG, 与 nodeget-postgres 分离)
+# ──────────────────────────────────────────────
+
+services:
+  monolith-db:
+    image: postgres:16-alpine
+    container_name: monolith-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: monolith
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+      POSTGRES_DB: monolith
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "monolith"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  monolith-server:
+    build:
+      context: ../..
+      dockerfile: server/Dockerfile
+    container_name: monolith-server
+    restart: unless-stopped
+    depends_on:
+      monolith-db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "8787"
+      HOST: "0.0.0.0"
+      DB_PROVIDER: postgres
+      STORAGE_PROVIDER: fs
+      FS_ROOT: /data/monolith-objects
+      AUTO_SCHEMA_MIGRATION: "true"
+      DATABASE_URL: postgres://monolith:${POSTGRES_PASSWORD}@monolith-db:5432/monolith
+      BLOG_NAME: ${BLOG_NAME:-Monolith}
+      SITE_ORIGIN: ${SITE_ORIGIN:-https://blog.eyasha.de}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET required}
+      REACTION_SALT: ${REACTION_SALT:-default-reaction-salt}
+      WEBHOOK_URLS: ${WEBHOOK_URLS:-}
+      ANALYTICS_WEBSITE_WHITELIST: ${ANALYTICS_WEBSITE_WHITELIST:-}
+    volumes:
+      - ./data/objects:/data/monolith-objects
+    ports:
+      - "127.0.0.1:8787:8787"
+    mem_limit: 512m
