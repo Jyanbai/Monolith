@@ -256,16 +256,23 @@ export function PostPage() {
               if (btn) {
                 const wrapper = btn.closest('.code-block-wrapper');
                 const codeNode = wrapper?.querySelector('code');
-                if (codeNode && codeNode.textContent) {
-                  // 固定 SVG 常量（避免从 DOM 属性读取后设 innerHTML 的 XSS 风险）
-                  const COPY_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
-                  const CHECK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-400"><path d="M20 6 9 17l-5-5"/></svg>';
-                  navigator.clipboard.writeText(codeNode.textContent).then(() => {
-                    btn.innerHTML = CHECK_SVG;
-                    setTimeout(() => {
-                      btn.innerHTML = COPY_SVG;
-                    }, 2000);
-                  }).catch(console.error);
+                if (codeNode) {
+                  // 只取 .line-content 内的文本，跳过行号；单行兜底走 textContent
+                  const lineContents = codeNode.querySelectorAll('.line-content');
+                  const codeText = lineContents.length > 0
+                    ? Array.from(lineContents).map(n => n.textContent ?? '').join('\n')
+                    : (codeNode.textContent ?? '');
+                  if (codeText) {
+                    // 固定 SVG 常量（避免从 DOM 属性读取后设 innerHTML 的 XSS 风险）
+                    const COPY_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+                    const CHECK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-400"><path d="M20 6 9 17l-5-5"/></svg>';
+                    navigator.clipboard.writeText(codeText).then(() => {
+                      btn.innerHTML = CHECK_SVG;
+                      setTimeout(() => {
+                        btn.innerHTML = COPY_SVG;
+                      }, 2000);
+                    }).catch(console.error);
+                  }
                 }
               }
             }}
