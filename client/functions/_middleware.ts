@@ -17,6 +17,25 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
+  // Cloudflare Pages' implicit SPA fallback returns index.html with status 200
+  // for missing files. A stale page can therefore receive HTML for an old JS
+  // chunk and fail with a blank screen. Preserve real assets, but turn an HTML
+  // fallback on code/static paths into an explicit non-cacheable 404.
+  if (pathname.startsWith("/assets/") || /^\/workbox-[\w-]+\.js$/.test(pathname)) {
+    const assetResponse = await context.next();
+    const contentType = assetResponse.headers.get("content-type") || "";
+    if (assetResponse.status === 200 && contentType.includes("text/html")) {
+      return new Response("Not Found", {
+        status: 404,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+    return assetResponse;
+  }
+
   // 仅处理文章页路径 /posts/:slug
   const postMatch = pathname.match(/^\/posts\/([^/]+)$/);
   if (!postMatch) {
