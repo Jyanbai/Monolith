@@ -31,7 +31,12 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        // Cloudflare Pages already provides the SPA fallback. Keeping index.html
+        // in the Workbox precache makes an old service worker serve stale chunk
+        // names after a Direct Upload deployment, which leaves the app blank.
+        navigateFallback: null,
+        cleanupOutdatedCaches: true,
+        globPatterns: ["**/*.{js,css,ico,png,svg,webmanifest}"],
         runtimeCaching: [
           {
             urlPattern: /\/cdn\/.*/i,
@@ -39,16 +44,6 @@ export default defineConfig({
             options: {
               cacheName: "monolith-images",
               expiration: { maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 },
-              cacheableResponse: { statuses: [0, 200] }
-            }
-          },
-          {
-            urlPattern: /\/api\/(?!auth\/|admin\/).*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "monolith-api",
-              expiration: { maxEntries: 100, maxAgeSeconds: 24 * 60 * 60 },
-              networkTimeoutSeconds: 5,
               cacheableResponse: { statuses: [0, 200] }
             }
           }
