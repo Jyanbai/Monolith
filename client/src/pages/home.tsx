@@ -4,31 +4,10 @@ import { Hero, type HeroAction, type HeroTopic } from "@/components/hero";
 import { ArticleCard } from "@/components/article-card";
 
 import { Separator } from "@/components/ui/separator";
-import { fetchPosts, fetchCategories, type PostMeta, type CategoryInfo } from "@/lib/api";
+import { fetchPosts, fetchCategories, fetchPublicSettings, type PostMeta, type CategoryInfo, type PublicSettings } from "@/lib/api";
 import { AnimateIn } from "@/hooks/use-animate";
 import { SeoHead } from "@/components/seo-head";
 import { ExternalLink, Mail, Rss, Eye, FolderOpen, Hash, ChevronDown, Link2 } from "lucide-react";
-
-type PublicSettings = {
-  site_title: string;
-  site_description: string;
-  site_tagline: string;
-  hero_kicker: string;
-  hero_subtitle: string;
-  hero_description: string;
-  hero_actions: string;
-  hero_topics: string;
-  site_og_image: string;
-  author_name: string;
-  author_title: string;
-  author_bio: string;
-  author_avatar: string;
-  github_url: string;
-  twitter_url: string;
-  email: string;
-  social_links: string;
-  rss_enabled: string;
-};
 
 const DEFAULT_HERO_ACTIONS: HeroAction[] = [
   { label: "最新文章", href: "#latest-posts" },
@@ -303,8 +282,7 @@ export function HomePage() {
       .catch(console.error)
       .finally(() => setLoading(false));
 
-    fetch("/api/settings/public")
-      .then((r) => r.json())
+    fetchPublicSettings()
       .then((data) => setSettings(data))
       .catch(() => {});
 

@@ -65,7 +65,35 @@ export type Post = PostMeta & {
   seriesOrder: number;
 };
 
+export type PublicSettings = {
+  site_title: string;
+  site_description: string;
+  site_tagline: string;
+  hero_kicker: string;
+  hero_subtitle: string;
+  hero_description: string;
+  hero_actions: string;
+  hero_topics: string;
+  site_og_image: string;
+  footer_text: string;
+  author_name: string;
+  author_title: string;
+  author_bio: string;
+  author_avatar: string;
+  github_url: string;
+  twitter_url: string;
+  email: string;
+  social_links: string;
+  rss_enabled: string;
+  custom_header: string;
+  custom_footer: string;
+};
+
 /* ── 公开 API ──────────────────────────────── */
+export async function fetchPublicSettings(): Promise<PublicSettings> {
+  return fetchJsonWithCache<PublicSettings>("/api/settings/public", 60_000);
+}
+
 export async function fetchPosts(): Promise<PostMeta[]> {
   return fetchJsonWithCache<PostMeta[]>("/api/posts", 60_000);
 }

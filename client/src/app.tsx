@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { AdminLayout } from "@/components/admin-layout";
 import { CookieConsent, getCookieConsent } from "@/components/cookie-consent";
 import { trackPageview, bindUnloadTracker } from "@/lib/analytics";
+import { fetchPublicSettings } from "@/lib/api";
 
 // 代码分割 (Code Splitting)
 const HomePage = lazy(() => import("@/pages/home").then((m) => ({ default: m.HomePage })));
@@ -74,8 +75,7 @@ export function App() {
 
   // 注入自定义 header/footer 代码（需 Cookie 同意后加载第三方脚本）
   useEffect(() => {
-    fetch("/api/settings/public")
-      .then((r) => r.json())
+    fetchPublicSettings()
       .then((s) => {
         const hasThirdParty = (s.custom_header && /<script/i.test(s.custom_header))
           || (s.custom_footer && /<script/i.test(s.custom_footer));

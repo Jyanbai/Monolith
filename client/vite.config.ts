@@ -36,7 +36,14 @@ export default defineConfig({
         // names after a Direct Upload deployment, which leaves the app blank.
         navigateFallback: null,
         cleanupOutdatedCaches: true,
-        globPatterns: ["**/*.{js,css,ico,png,svg,webmanifest}"],
+        // Precache only the shared entry and the two primary public routes.
+        // Other lazy routes and admin chunks keep their immutable CDN caching
+        // without being downloaded whenever the service worker updates.
+        globPatterns: [
+          "assets/index-*.{js,css}",
+          "assets/home-*.js",
+          "assets/post-*.js",
+        ],
         runtimeCaching: [
           {
             urlPattern: /\/cdn\/.*/i,

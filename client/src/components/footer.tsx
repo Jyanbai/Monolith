@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { AnimateIn } from "@/hooks/use-animate";
-import { fetchNavPages, type NavPage } from "@/lib/api";
+import { fetchNavPages, fetchPublicSettings, type NavPage } from "@/lib/api";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -9,8 +9,7 @@ export function Footer() {
   const [navPages, setNavPages] = useState<NavPage[]>([]);
 
   useEffect(() => {
-    fetch("/api/settings/public")
-      .then((r) => r.json())
+    fetchPublicSettings()
       .then((data) => setFooterText(data.footer_text || ""))
       .catch(() => {});
   }, []);
