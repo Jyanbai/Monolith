@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "icon-192.png", "icon-512.png"],
+      includeAssets: ["favicon-p2.png", "icon-192.png", "icon-512.png"],
       manifest: {
         name: "Monolith",
         short_name: "Monolith",
